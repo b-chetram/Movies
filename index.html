@@ -882,6 +882,124 @@ input[type="text"]:focus {
   .sim-grid { gap: 5px; }
   .sim-section { padding: 12px 14px 18px; }
 }
+
+/* ── AI CRITIC PANEL ──────────────────────────────────────── */
+.ai-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 10px 18px; border-radius: 6px;
+  border: 1px solid #5a9fd4; background: rgba(90,159,212,0.1);
+  color: #5a9fd4; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: all 0.2s; white-space: nowrap;
+}
+.ai-btn:hover { background: rgba(90,159,212,0.22); box-shadow: 0 0 18px rgba(90,159,212,0.18); }
+.ai-btn:active { transform: scale(0.97); }
+
+.ai-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+  z-index: 10500; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.ai-overlay.open { opacity: 1; pointer-events: all; }
+
+.ai-panel {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #13131c; border-top: 1px solid #252535;
+  border-radius: 20px 20px 0 0; z-index: 10501;
+  max-height: 80vh; display: flex; flex-direction: column;
+  transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.34,1.1,0.64,1);
+  overflow: hidden;
+}
+.ai-panel.open { transform: translateY(0); }
+
+.ai-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px 14px; border-bottom: 1px solid #1e1e2e; flex-shrink: 0;
+}
+.ai-panel-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: #5a9fd4; }
+.ai-panel-sub { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #5a5a72; margin-top: 2px; }
+.ai-close-btn {
+  width: 32px; height: 32px; border-radius: 50%; border: 1px solid #252535;
+  background: transparent; color: #5a5a72; cursor: pointer; font-size: 18px;
+  display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+}
+.ai-close-btn:hover { border-color: #ff5c5c; color: #ff5c5c; }
+
+.ai-panel-body { padding: 16px 24px 20px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+
+.ai-key-section { margin-bottom: 16px; }
+.ai-key-label {
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: #5a5a72; font-family: 'DM Mono', monospace; margin-bottom: 8px;
+}
+.ai-key-row { display: flex; gap: 8px; align-items: center; }
+.ai-key-input {
+  flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px; padding: 10px 12px; color: #fff; font: inherit; font-size: 13px;
+  outline: none; font-family: 'DM Mono', monospace;
+}
+.ai-key-input:focus { border-color: rgba(90,159,212,0.5); }
+.ai-key-save {
+  padding: 10px 16px; border-radius: 8px; border: 1px solid #5a9fd4;
+  background: rgba(90,159,212,0.15); color: #5a9fd4; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; cursor: pointer; white-space: nowrap; transition: all 0.2s;
+}
+.ai-key-save:hover { background: rgba(90,159,212,0.28); }
+.ai-key-note { font-size: 11px; color: #5a5a72; margin-top: 6px; line-height: 1.5; }
+.ai-key-note a { color: #5a9fd4; }
+
+.ai-thread { max-height: 42vh; overflow-y: auto; margin-bottom: 14px; padding-right: 4px; -webkit-overflow-scrolling: touch; }
+.ai-msg-row { display: flex; margin-bottom: 12px; }
+.ai-msg-row.user { justify-content: flex-end; }
+.ai-msg-row.assistant { justify-content: flex-start; align-items: flex-end; gap: 8px; }
+.ai-user-bubble {
+  background: rgba(90,159,212,0.18); border: 1px solid rgba(90,159,212,0.3);
+  border-radius: 14px 14px 3px 14px; padding: 10px 14px;
+  font-size: 13px; color: #c8d8e8; max-width: 78%; line-height: 1.5;
+}
+.ai-assistant-bubble {
+  background: rgba(255,255,255,0.04); border: 1px solid #252535;
+  border-radius: 14px 14px 14px 3px; padding: 10px 14px;
+  font-size: 13px; color: #e4e4f0; max-width: 78%; line-height: 1.6;
+}
+.ai-err {
+  background: rgba(255,92,92,0.1); border: 1px solid rgba(255,92,92,0.3);
+  border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #ff8a8a;
+  max-width: 85%; line-height: 1.5;
+}
+.ai-speak-btn {
+  width: 28px; height: 28px; border-radius: 50%; border: 1px solid #252535;
+  background: transparent; color: #5a5a72; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+  margin-bottom: 2px;
+}
+.ai-speak-btn:hover { border-color: #5a9fd4; color: #5a9fd4; }
+.ai-speak-btn.speaking { border-color: #5a9fd4; color: #5a9fd4; animation: speakPulse 1s ease infinite; }
+@keyframes speakPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.ai-input-row { display: flex; gap: 8px; align-items: flex-end; }
+.ai-input {
+  flex: 1; resize: none; min-height: 64px; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 12px;
+  color: #fff; font: inherit; font-size: 13px; line-height: 1.4; outline: none;
+}
+.ai-input:focus { border-color: rgba(90,159,212,0.4); }
+.ai-send-btn {
+  padding: 10px 18px; border-radius: 10px; border: 1px solid #5a9fd4;
+  background: rgba(90,159,212,0.2); color: #5a9fd4; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; align-self: flex-end;
+}
+.ai-send-btn:hover { background: rgba(90,159,212,0.35); }
+.ai-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.ai-thread-controls { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.ai-clear-btn {
+  font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #5a5a72;
+  background: transparent; border: none; cursor: pointer; font-family: 'DM Mono', monospace;
+  padding: 4px 0; transition: color 0.2s;
+}
+.ai-clear-btn:hover { color: #ff5c5c; }
+.ai-typing { font-size: 12px; color: #5a5a72; padding: 6px 0; }
 </style>
 </head>
 <body style="">
@@ -932,6 +1050,14 @@ input[type="text"]:focus {
     <button class="mobile-filter-btn" id="mobileFilterBtn" onclick="toggleMobileFilters()" style="display:none">
       <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/></svg>
       Filters
+    </button>
+    <button class="save-btn" id="saveBtn" onclick="saveProgress()">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span>Save Progress</span>
+    </button>
+    <button class="ai-btn" onclick="openCriticPanel()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Ask the Critic</span>
     </button>
 
   </div>
@@ -2243,7 +2369,342 @@ function applyOmdbDetail(d, idx) {
 }
 
 
+// ══════════════════════════════════════════════════════════════════════
+// THE CRITIC — AI Chat (Llama 3.3 70B via Groq)
+// Free key at console.groq.com/keys — stored only in localStorage.
+// ══════════════════════════════════════════════════════════════════════
+
+const CRITIC_KEY_LS    = 'mc_groq_key';
+const CRITIC_THREAD_LS = 'mc_critic_thread';
+const CRITIC_MODEL     = 'llama-3.3-70b-versatile';
+const CRITIC_MAX_TURNS = 20;
+
+let _criticHistory = [];
+let _isCriticBusy  = false;
+let _speakingIdx   = -1;
+
+function getCriticKey()       { try { return localStorage.getItem(CRITIC_KEY_LS) || ''; } catch(e) { return ''; } }
+function setCriticKeyLS(k)    { try { localStorage.setItem(CRITIC_KEY_LS, k); } catch(e) {} }
+function clearCriticKey()     { try { localStorage.removeItem(CRITIC_KEY_LS); } catch(e) {} }
+
+function loadCriticHistory() {
+  try {
+    const raw = localStorage.getItem(CRITIC_THREAD_LS);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) _criticHistory = parsed.slice(-CRITIC_MAX_TURNS * 2);
+    }
+  } catch(e) {}
+}
+
+function saveCriticHistory() {
+  try { localStorage.setItem(CRITIC_THREAD_LS, JSON.stringify(_criticHistory)); } catch(e) {}
+}
+
+function clearCriticChat() {
+  if (_criticHistory.length && !confirm('Clear the conversation with the critic?')) return;
+  _criticHistory = [];
+  saveCriticHistory();
+  renderCriticThread();
+}
+
+function openCriticPanel() {
+  loadCriticHistory();
+  const hasKey = !!getCriticKey();
+  document.getElementById('aiKeySection').style.display     = hasKey ? 'none' : 'block';
+  document.getElementById('aiThreadControls').style.display = (_criticHistory.length && hasKey) ? 'flex' : 'none';
+  document.getElementById('aiOverlay').classList.add('open');
+  document.getElementById('aiPanel').classList.add('open');
+  renderCriticThread();
+  if (hasKey) setTimeout(() => document.getElementById('aiInput').focus(), 350);
+}
+
+function closeCriticPanel() {
+  document.getElementById('aiOverlay').classList.remove('open');
+  document.getElementById('aiPanel').classList.remove('open');
+  window.speechSynthesis && window.speechSynthesis.cancel();
+}
+
+function saveCriticKey() {
+  const v = document.getElementById('aiKeyInput').value.trim();
+  if (!v) { alert('Paste your Groq API key first.'); return; }
+  setCriticKeyLS(v);
+  document.getElementById('aiKeyInput').value = '';
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiInput').focus();
+}
+
+function resetCriticKey() {
+  clearCriticKey();
+  document.getElementById('aiKeySection').style.display = 'block';
+  document.getElementById('aiKeyInput').value = '';
+}
+
+// ── Build movie context for the system prompt ──────────────────────
+function buildMovieContext() {
+  const seen   = [];
+  const unseen = [];
+
+  MOVIES.forEach((m, i) => {
+    const s = state[i];
+    if (s.seen) {
+      const stars = s.rating > 0 ? ('★'.repeat(s.rating) + '☆'.repeat(5 - s.rating) + ' (' + s.rating + '/5)') : 'not rated';
+      seen.push(`${m.title} (${m.year}) [${m.genre}] — Their rating: ${stars}`);
+    } else {
+      unseen.push(`${m.title} (${m.year}) [${m.genre}]`);
+    }
+  });
+
+  const genreTally = {};
+  MOVIES.forEach((m, i) => {
+    if (state[i].seen) genreTally[m.genre] = (genreTally[m.genre] || 0) + 1;
+  });
+  const topGenres = Object.entries(genreTally).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([g, n]) => `${g} (${n})`).join(', ');
+
+  const avgRating = (() => {
+    const rated = MOVIES.map((_, i) => state[i].rating).filter(r => r > 0);
+    return rated.length ? (rated.reduce((a, b) => a + b, 0) / rated.length).toFixed(1) : 'none yet';
+  })();
+
+  return (
+    '━━ MOVIES THEY\'VE SEEN (' + seen.length + ') ━━\n' +
+    (seen.length ? seen.join('\n') : '(none yet)') + '\n\n' +
+    '━━ STILL ON THE WATCHLIST (' + unseen.length + ') ━━\n' +
+    (unseen.length ? unseen.join('\n') : '(all watched)') + '\n\n' +
+    '━━ TASTE PROFILE ━━\n' +
+    'Top genres watched: ' + (topGenres || 'unknown') + '\n' +
+    'Average star rating given: ' + avgRating + '/5\n'
+  );
+}
+
+// ── Render the chat thread ─────────────────────────────────────────
+function _escC(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderCriticThread(loadingMsg) {
+  const thread   = document.getElementById('aiThread');
+  const controls = document.getElementById('aiThreadControls');
+  if (!thread) return;
+
+  if (!_criticHistory.length && !loadingMsg) {
+    thread.innerHTML = '';
+    if (controls) controls.style.display = 'none';
+    return;
+  }
+
+  if (controls && _criticHistory.length) controls.style.display = 'flex';
+
+  let html = '';
+  _criticHistory.forEach((m, idx) => {
+    if (m.role === 'user') {
+      html += `<div class="ai-msg-row user"><div class="ai-user-bubble">${_escC(m.content)}</div></div>`;
+    } else {
+      html += `<div class="ai-msg-row assistant">
+        <button class="ai-speak-btn" id="speak-${idx}" onclick="speakMessage(${idx})" title="Read aloud">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+          </svg>
+        </button>
+        <div class="ai-assistant-bubble">${_escC(m.content)}</div>
+      </div>`;
+    }
+  });
+
+  if (loadingMsg) {
+    html += `<div class="ai-msg-row assistant"><div class="ai-typing">${_escC(loadingMsg)}</div></div>`;
+  }
+
+  thread.innerHTML = html;
+  requestAnimationFrame(() => { thread.scrollTop = thread.scrollHeight; });
+}
+
+// ── Text-to-Speech with Australian voice ──────────────────────────
+function speakMessage(histIdx) {
+  if (!window.speechSynthesis) { alert('Your browser doesn\'t support speech synthesis.'); return; }
+
+  const msg = _criticHistory[histIdx];
+  if (!msg || msg.role !== 'assistant') return;
+
+  const allBtns = document.querySelectorAll('.ai-speak-btn');
+
+  if (_speakingIdx === histIdx && window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    _speakingIdx = -1;
+    allBtns.forEach(b => b.classList.remove('speaking'));
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+  _speakingIdx = histIdx;
+
+  allBtns.forEach(b => b.classList.remove('speaking'));
+  const activeBtn = document.getElementById('speak-' + histIdx);
+  if (activeBtn) activeBtn.classList.add('speaking');
+
+  const utt = new SpeechSynthesisUtterance(msg.content);
+  utt.rate  = 1.05;
+  utt.pitch = 0.95;
+
+  const pickVoice = () => {
+    const voices = window.speechSynthesis.getVoices();
+    const auVoice = voices.find(v => v.lang === 'en-AU') ||
+                    voices.find(v => v.lang.startsWith('en-AU')) ||
+                    voices.find(v => /australia/i.test(v.name)) ||
+                    null;
+    if (auVoice) utt.voice = auVoice;
+  };
+
+  pickVoice();
+  if (!utt.voice && window.speechSynthesis.getVoices().length === 0) {
+    window.speechSynthesis.onvoiceschanged = () => { pickVoice(); window.speechSynthesis.speak(utt); };
+  } else {
+    window.speechSynthesis.speak(utt);
+  }
+
+  utt.onend = utt.onerror = () => {
+    _speakingIdx = -1;
+    allBtns.forEach(b => b.classList.remove('speaking'));
+  };
+}
+
+// ── Main API call ──────────────────────────────────────────────────
+async function askCritic(userText) {
+  if (_isCriticBusy) return;
+
+  const key = getCriticKey();
+  if (!key) {
+    document.getElementById('aiKeySection').style.display = 'block';
+    return;
+  }
+
+  _isCriticBusy = true;
+  document.getElementById('aiSendBtn').disabled = true;
+
+  _criticHistory.push({ role: 'user', content: userText });
+  saveCriticHistory();
+  renderCriticThread('The critic is fuming…');
+
+  const systemContent =
+    'You are Bruce, a brutally opinionated Australian film critic. ' +
+    'You have a thick Australian accent in your writing — use "mate", "reckon", "bloody", "crikey", "arvo", "strewth", and other Aussie expressions naturally. ' +
+    'You are deeply passionate about serious cinema and have zero patience for silly, brainless, or formulaic films. ' +
+    'When you see they\'ve given low ratings to prestige films or high ratings to populist fluff, give them grief — affectionately but mercilessly. ' +
+    'You recommend films with genuine conviction. You cite specific directors, cinematographers, and thematic ideas. ' +
+    'You are entertaining and funny but never soft — you\'ll call out a bad taste without hesitation. ' +
+    'Keep responses under 200 words unless a detailed breakdown is asked for. No filler, no disclaimers.\n\n' +
+    '━━ CURRENT MOVIE DATA ━━\n' + buildMovieContext();
+
+  const messages = [{ role: 'system', content: systemContent }].concat(
+    _criticHistory.map(m => ({ role: m.role, content: m.content }))
+  );
+
+  try {
+    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({ model: CRITIC_MODEL, messages, temperature: 0.8, max_tokens: 600 })
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      let friendly = 'Error ' + resp.status;
+      try {
+        const j = JSON.parse(errText);
+        const code = (j.error || {}).code || '';
+        if (resp.status === 429 || code === 'rate_limit_exceeded') friendly = 'Crikey — Groq rate limit hit. Wait 15 seconds and try again. (Free tier: 30 req/min)';
+        else if (resp.status === 401) friendly = 'Invalid API key, mate. Tap "Change API key" below to update it.';
+        else if (resp.status >= 500) friendly = 'Groq\'s having a moment — try again in a tick.';
+        else if ((j.error || {}).message) friendly = j.error.message;
+      } catch(e) {}
+      _criticHistory.pop();
+      saveCriticHistory();
+      renderCriticThread();
+      const thread = document.getElementById('aiThread');
+      if (thread) {
+        thread.insertAdjacentHTML('beforeend', `<div class="ai-msg-row assistant"><div class="ai-err">${_escC(friendly)}</div></div>`);
+        thread.scrollTop = thread.scrollHeight;
+      }
+      return;
+    }
+
+    const data = await resp.json();
+    const text = (((data || {}).choices || [])[0] || {}).message
+                   ? (data.choices[0].message.content || '').trim()
+                   : '';
+    if (!text) { _criticHistory.pop(); saveCriticHistory(); renderCriticThread(); return; }
+
+    _criticHistory.push({ role: 'assistant', content: text });
+    saveCriticHistory();
+    renderCriticThread();
+
+  } catch(e) {
+    _criticHistory.pop();
+    saveCriticHistory();
+    renderCriticThread();
+    const thread = document.getElementById('aiThread');
+    if (thread) {
+      const netMsg = 'Network error — check your connection and try again.';
+      thread.insertAdjacentHTML('beforeend', `<div class="ai-msg-row assistant"><div class="ai-err">${_escC(netMsg)}</div></div>`);
+      thread.scrollTop = thread.scrollHeight;
+    }
+  } finally {
+    _isCriticBusy = false;
+    document.getElementById('aiSendBtn').disabled = false;
+  }
+}
+
+function askCriticCustom() {
+  const el = document.getElementById('aiInput');
+  const v  = el.value.trim();
+  if (!v) return;
+  el.value = '';
+  askCritic(v);
+}
+
+function criticInputKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
+    e.preventDefault();
+    askCriticCustom();
+  }
+}
+
 
 </script>
+
+<!-- AI CRITIC PANEL -->
+<div class="ai-overlay" id="aiOverlay" onclick="closeCriticPanel()"></div>
+<div class="ai-panel" id="aiPanel">
+  <div class="ai-panel-header">
+    <div>
+      <div class="ai-panel-title">THE CRITIC</div>
+      <div class="ai-panel-sub">Powered by Llama 3.3 70B via Groq · Free</div>
+    </div>
+    <button class="ai-close-btn" onclick="closeCriticPanel()">×</button>
+  </div>
+  <div class="ai-panel-body" id="aiPanelBody">
+    <div class="ai-key-section" id="aiKeySection" style="display:none">
+      <div class="ai-key-label">Groq API Key</div>
+      <div class="ai-key-row">
+        <input type="password" class="ai-key-input" id="aiKeyInput" placeholder="gsk_…">
+        <button class="ai-key-save" onclick="saveCriticKey()">Save</button>
+      </div>
+      <div class="ai-key-note">
+        Free key from <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a> — stored only on your device, never sent anywhere except Groq.
+      </div>
+    </div>
+    <div class="ai-thread-controls" id="aiThreadControls" style="display:none">
+      <button class="ai-clear-btn" onclick="clearCriticChat()">Clear chat</button>
+    </div>
+    <div class="ai-thread" id="aiThread"></div>
+    <div class="ai-input-row">
+      <textarea class="ai-input" id="aiInput" placeholder="Ask the critic anything — what to watch next, why a film is overrated, your taste in movies…" onkeydown="criticInputKey(event)"></textarea>
+      <button class="ai-send-btn" id="aiSendBtn" onclick="askCriticCustom()">Send</button>
+    </div>
+    <div style="margin-top:10px;text-align:center">
+      <button class="ai-clear-btn" onclick="resetCriticKey()" style="font-size:9px;opacity:.5">Change API key</button>
+    </div>
+  </div>
+</div>
 
 </body></html>
