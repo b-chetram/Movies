@@ -2519,53 +2519,97 @@ function renderCriticThread(loadingMsg) {
   requestAnimationFrame(() => { thread.scrollTop = thread.scrollHeight; });
 }
 
-// ── Text-to-Speech with Australian voice ──────────────────────────
-function speakMessage(histIdx) {
-  if (!window.speechSynthesis) { alert('Your browser doesn\'t support speech synthesis.'); return; }
+// ── Text-to-Speech via ElevenLabs (Australian voice) ──────────────
+const EL_KEY_LS   = 'mc_el_key';
+const EL_VOICE_ID = 'IKne3meq5aSn9XLyUdCD'; // Charlie — Australian male
 
+function getELKey()    { try { return localStorage.getItem(EL_KEY_LS) || ''; } catch(e) { return ''; } }
+function setELKeyLS(k) { try { localStorage.setItem(EL_KEY_LS, k); } catch(e) {} }
+
+let _currentAudio = null;
+
+async function speakMessage(histIdx) {
   const msg = _criticHistory[histIdx];
   if (!msg || msg.role !== 'assistant') return;
 
   const allBtns = document.querySelectorAll('.ai-speak-btn');
 
-  if (_speakingIdx === histIdx && window.speechSynthesis.speaking) {
-    window.speechSynthesis.cancel();
+  if (_speakingIdx === histIdx) {
+    if (_currentAudio) { _currentAudio.pause(); _currentAudio = null; }
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
     _speakingIdx = -1;
     allBtns.forEach(b => b.classList.remove('speaking'));
     return;
   }
 
-  window.speechSynthesis.cancel();
+  if (_currentAudio) { _currentAudio.pause(); _currentAudio = null; }
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
   _speakingIdx = histIdx;
-
   allBtns.forEach(b => b.classList.remove('speaking'));
   const activeBtn = document.getElementById('speak-' + histIdx);
   if (activeBtn) activeBtn.classList.add('speaking');
 
-  const utt = new SpeechSynthesisUtterance(msg.content);
-  utt.rate  = 1.05;
-  utt.pitch = 0.95;
-
-  const pickVoice = () => {
-    const voices = window.speechSynthesis.getVoices();
-    const auVoice = voices.find(v => v.lang === 'en-AU') ||
-                    voices.find(v => v.lang.startsWith('en-AU')) ||
-                    voices.find(v => /australia/i.test(v.name)) ||
-                    null;
-    if (auVoice) utt.voice = auVoice;
-  };
-
-  pickVoice();
-  if (!utt.voice && window.speechSynthesis.getVoices().length === 0) {
-    window.speechSynthesis.onvoiceschanged = () => { pickVoice(); window.speechSynthesis.speak(utt); };
-  } else {
-    window.speechSynthesis.speak(utt);
+  let key = getELKey();
+  if (!key) {
+    const k = prompt('Paste your free ElevenLabs API key (elevenlabs.io → Profile → API Keys):');
+    if (!k || !k.trim()) {
+      _speakingIdx = -1;
+      allBtns.forEach(b => b.classList.remove('speaking'));
+      return;
+    }
+    setELKeyLS(k.trim());
+    key = k.trim();
   }
 
-  utt.onend = utt.onerror = () => {
-    _speakingIdx = -1;
-    allBtns.forEach(b => b.classList.remove('speaking'));
-  };
+  try {
+    const resp = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + EL_VOICE_ID, {
+      method: 'POST',
+      headers: { 'Accept': 'audio/mpeg', 'Content-Type': 'application/json', 'xi-api-key': key },
+      body: JSON.stringify({
+        text: msg.content,
+        model_id: 'eleven_turbo_v2_5',
+        voice_settings: { stability: 0.48, similarity_boost: 0.78, style: 0.3, use_speaker_boost: true }
+      })
+    });
+
+    if (!resp.ok) {
+      if (resp.status === 401) {
+        localStorage.removeItem(EL_KEY_LS);
+        alert('Invalid ElevenLabs key — tap the speaker again to re-enter it.');
+      } else {
+        _speakFallback(msg.content, histIdx);
+        return;
+      }
+      _speakingIdx = -1;
+      allBtns.forEach(b => b.classList.remove('speaking'));
+      return;
+    }
+
+    const blob = await resp.blob();
+    const url  = URL.createObjectURL(blob);
+    _currentAudio = new Audio(url);
+    _currentAudio.play();
+    _currentAudio.onended = _currentAudio.onerror = () => {
+      URL.revokeObjectURL(url);
+      _currentAudio = null;
+      _speakingIdx  = -1;
+      allBtns.forEach(b => b.classList.remove('speaking'));
+    };
+  } catch(e) {
+    _speakFallback(msg.content, histIdx);
+  }
+}
+
+function _speakFallback(text, histIdx) {
+  const allBtns = document.querySelectorAll('.ai-speak-btn');
+  if (!window.speechSynthesis) { _speakingIdx = -1; allBtns.forEach(b => b.classList.remove('speaking')); return; }
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.rate = 1.05; utt.pitch = 0.95;
+  const voices = window.speechSynthesis.getVoices();
+  const auVoice = voices.find(v => v.lang === 'en-AU') || voices.find(v => /australia/i.test(v.name));
+  if (auVoice) utt.voice = auVoice;
+  window.speechSynthesis.speak(utt);
+  utt.onend = utt.onerror = () => { _speakingIdx = -1; allBtns.forEach(b => b.classList.remove('speaking')); };
 }
 
 // ── Main API call ──────────────────────────────────────────────────
